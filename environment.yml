@@ -1,0 +1,9 @@
+name: apriltag-tracker
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - numpy
+  - pip
+  - pip:
+      - opencv-python>=4.13,<5

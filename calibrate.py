@@ -46,10 +46,13 @@ def locate_chessboard_corners():
 
     cv.destroyAllWindows()
 
+    if len(objpoints) == 0:
+        raise RuntimeError("chessboard not found in any calibration image")
+
     return objpoints, imgpoints, gray.shape[::-1]
 
 if __name__ == "__main__":
-    objpoints, imgpoints, gray.shape[::-1] = locate_chessboard_corners()
+    objpoints, imgpoints, image_size = locate_chessboard_corners()
     ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(
-        objpoints, imgpoints, gray.shape[::-1], None, None
+        objpoints, imgpoints, image_size, None, None
     )

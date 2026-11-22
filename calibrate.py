@@ -9,6 +9,8 @@ import numpy as np
 import cv2 as cv
 import glob
 
+CALIBRATION_FILE = "calibration.txt"
+
 def locate_chessboard_corners():
     # termination criteria
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
@@ -51,8 +53,45 @@ def locate_chessboard_corners():
 
     return objpoints, imgpoints, gray.shape[::-1]
 
+def save_calibration(path, mtx, dist, image_size, rms, num_images):
+    """Save the calibration values in calibration.txt"""
+    k1, k2, p1, p2, k3 = dist.ravel()
+    values = [
+        ("image_width", image_size[0]),
+        ("image_height", image_size[1]),
+        ("fx", mtx[0, 0]),
+        ("fy", mtx[1, 1]),
+        ("cx", mtx[0, 2]),
+        ("cy", mtx[1, 2]),
+        ("k1", k1),
+        ("k2", k2),
+        ("p1", p1),
+        ("p2", p2),
+        ("k3", k3),
+        ("reprojection_error_px", rms),
+        ("num_images", num_images),
+    ]
+    with open(path, "w") as file:
+        for name, value in values:
+            file.write(f"{name} {value}\n")
+
 if __name__ == "__main__":
     objpoints, imgpoints, image_size = locate_chessboard_corners()
     ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(
         objpoints, imgpoints, image_size, None, None
     )
+
+    # ret is the RMS reprojection error in pixels
+    print(f"Images used: {len(objpoints)}")
+    print(f"Image size: {image_size[0]}x{image_size[1]}")
+    print(f"fx = {mtx[0, 0]:.2f}")
+    print(f"fy = {mtx[1, 1]:.2f}")
+    print(f"cx = {mtx[0, 2]:.2f}")
+    print(f"cy = {mtx[1, 2]:.2f}")
+    print(
+        f"Distortion (k1, k2, p1, p2, k3): {np.round(dist.ravel(), 4).tolist()}"
+    )
+    print(f"Reprojection error: {ret:.3f} px")
+
+    save_calibration(CALIBRATION_FILE, mtx, dist, image_size, ret, len(objpoints))
+    print(f"Saved calibration to {CALIBRATION_FILE}")

@@ -76,7 +76,7 @@ def main():
             corners, ids, _ = detector.detectMarkers(gray)
 
             if ids is not None:
-                cv.aruco.drawDetectedMarkers(frame, corners, ids)
+                cv.aruco.drawDetectedMarkers(frame, corners, None)
 
                 for tag_corners, tag_id in zip(corners, ids.ravel()):
                     # rvec = rotation
@@ -94,7 +94,7 @@ def main():
                     x, y = tag_corners[0][0].astype(int)  # top left
                     cv.putText(frame, f"ID {tag_id}: {distance_cm:.1f} cm",
                                (x, y - 15), cv.FONT_HERSHEY_SIMPLEX, 1,
-                               (255, 255, 0), 3)
+                               (0, 255, 255), 3)
 
             cv.imshow(WINDOW, frame)
             cv.waitKey(1)
